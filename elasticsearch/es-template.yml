@@ -1,0 +1,309 @@
+apiVersion: v1
+kind: Template
+metadata:
+  creationTimestamp: null
+  name: elasticsearch
+objects:
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftWebConsole
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: elasticsearch
+    name: elasticsearch
+  spec:
+    replicas: 1
+    selector:
+      app: elasticsearch
+      deploymentconfig: elasticsearch
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftWebConsole
+        creationTimestamp: null
+        labels:
+          app: elasticsearch
+          deploymentconfig: elasticsearch
+      spec:
+        containers:
+        - image: elasticsearch:latest
+          imagePullPolicy: Always
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 9200
+              scheme: HTTP
+            initialDelaySeconds: 120
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
+          name: elasticsearch
+          ports:
+          - containerPort: 9200
+            protocol: TCP
+          - containerPort: 9300
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 9200
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          volumeMounts:
+          - mountPath: /usr/share/elasticsearch/data
+            name: elasticsearch-1
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - emptyDir: {}
+          name: elasticsearch-1
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - elasticsearch
+        from:
+          kind: ImageStreamTag
+          name: elasticsearch:latest
+      type: ImageChange
+  status:
+    availableReplicas: 0
+    latestVersion: 0
+    observedGeneration: 0
+    replicas: 0
+    unavailableReplicas: 0
+    updatedReplicas: 0
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftWebConsole
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: kibana
+    name: kibana
+  spec:
+    replicas: 1
+    selector:
+      app: kibana
+      deploymentconfig: kibana
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftWebConsole
+        creationTimestamp: null
+        labels:
+          app: kibana
+          deploymentconfig: kibana
+      spec:
+        containers:
+        - env:
+          - name: ELASTICSEARCH_URL
+            value: http://elasticsearch:9200
+          image: kibana:latest
+          imagePullPolicy: Always
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 5601
+              scheme: HTTP
+            initialDelaySeconds: 120
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
+          name: kibana
+          ports:
+          - containerPort: 5601
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 5601
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - kibana
+        from:
+          kind: ImageStreamTag
+          name: kibana:latest
+      type: ImageChange
+  status:
+    availableReplicas: 0
+    latestVersion: 0
+    observedGeneration: 0
+    replicas: 0
+    unavailableReplicas: 0
+    updatedReplicas: 0
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftWebConsole
+    creationTimestamp: null
+    labels:
+      app: elasticsearch
+    name: elasticsearch
+  spec:
+    ports:
+    - name: 9200-tcp
+      port: 9200
+      protocol: TCP
+      targetPort: 9200
+    - name: 9300-tcp
+      port: 9300
+      protocol: TCP
+      targetPort: 9300
+    selector:
+      deploymentconfig: elasticsearch
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftWebConsole
+      service.alpha.openshift.io/dependencies: '[{"name":"elasticsearch","namespace":"","kind":"Service"}]'
+    creationTimestamp: null
+    labels:
+      app: kibana
+    name: kibana
+  spec:
+    ports:
+    - name: 5601-tcp
+      port: 5601
+      protocol: TCP
+      targetPort: 5601
+    selector:
+      deploymentconfig: kibana
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Route
+  metadata:
+    annotations:
+      openshift.io/host.generated: "true"
+    creationTimestamp: null
+    name: kibana
+  spec:
+    host: kibana-is-test.40.74.122.193.xip.io
+    port:
+      targetPort: 5601-tcp
+    to:
+      kind: Service
+      name: kibana
+      weight: 100
+    wildcardPolicy: None
+  status:
+    ingress:
+    - conditions:
+      - lastTransitionTime: 2017-06-16T15:40:44Z
+        status: "True"
+        type: Admitted
+      host: kibana-is-test.40.74.122.193.xip.io
+      routerName: router
+      wildcardPolicy: None
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      openshift.io/image.dockerRepositoryCheck: 2017-06-16T15:38:13Z
+    creationTimestamp: null
+    generation: 2
+    labels:
+      app: elasticsearch
+    name: elasticsearch
+  spec:
+    tags:
+    - annotations:
+        openshift.io/generated-by: OpenShiftWebConsole
+        openshift.io/imported-from: elasticsearch
+      from:
+        kind: DockerImage
+        name: elasticsearch:latest
+      generation: 2
+      importPolicy: {}
+      name: latest
+      referencePolicy:
+        type: Source
+  status:
+    dockerImageRepository: ""
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      openshift.io/image.dockerRepositoryCheck: 2017-06-16T15:39:52Z
+    creationTimestamp: null
+    generation: 2
+    labels:
+      app: kibana
+    name: kibana
+  spec:
+    tags:
+    - annotations:
+        openshift.io/generated-by: OpenShiftWebConsole
+        openshift.io/imported-from: kibana
+      from:
+        kind: DockerImage
+        name: kibana:latest
+      generation: 2
+      importPolicy: {}
+      name: latest
+      referencePolicy:
+        type: Source
+  status:
+    dockerImageRepository: ""
