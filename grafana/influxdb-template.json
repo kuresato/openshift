@@ -10,11 +10,11 @@
             "kind": "DeploymentConfig",
             "apiVersion": "v1",
             "metadata": {
-                "name": "${SERVICE_NAME}_influxdb",
+                "name": "${SERVICE_NAME}-influxdb",
                 "generation": 1,
                 "creationTimestamp": null,
                 "labels": {
-                    "app": "${SERVICE_NAME}_influxdb"
+                    "app": "${SERVICE_NAME}-influxdb"
                 },
                 "annotations": {
                     "openshift.io/generated-by": "OpenShiftWebConsole"
@@ -46,7 +46,7 @@
                             ],
                             "from": {
                                 "kind": "ImageStreamTag",
-                                "name": "influxdb:1.2-alpine"
+                                "name": "${SERVICE_NAME}-influxdb:1.2-alpine"
                             }
                         }
                     }
@@ -54,15 +54,15 @@
                 "replicas": 1,
                 "test": false,
                 "selector": {
-                    "app": "${SERVICE_NAME}_influxdb",
-                    "deploymentconfig": "${SERVICE_NAME}_influxdb"
+                    "app": "${SERVICE_NAME}-influxdb",
+                    "deploymentconfig": "${SERVICE_NAME}-influxdb"
                 },
                 "template": {
                     "metadata": {
                         "creationTimestamp": null,
                         "labels": {
-                            "app": "${SERVICE_NAME}_influxdb",
-                            "deploymentconfig": "${SERVICE_NAME}_influxdb"
+                            "app": "${SERVICE_NAME}-influxdb",
+                            "deploymentconfig": "${SERVICE_NAME}-influxdb"
                         },
                         "annotations": {
                             "openshift.io/generated-by": "OpenShiftWebConsole"
@@ -71,9 +71,9 @@
                     "spec": {
                         "volumes": [
                             {
-                                "name": "${SERVICE_NAME}_influxdb-data",
+                                "name": "${SERVICE_NAME}-influxdb-data",
                                 "persistentVolumeClaim": {
-                                    "claimName": "${SERVICE_NAME}_influxdb-data"
+                                    "claimName": "${SERVICE_NAME}-influxdb-data"
                                 }
                             }
                         ],
@@ -100,7 +100,7 @@
                                 "resources": {},
                                 "volumeMounts": [
                                     {
-                                        "name": "${SERVICE_NAME}_influxdb-data",
+                                        "name": "${SERVICE_NAME}-influxdb-data",
                                         "mountPath": "/var/lib/influxdb"
                                     }
                                 ],
@@ -138,24 +138,16 @@
                         "securityContext": {}
                     }
                 }
-            },
-            "status": {
-                "latestVersion": 0,
-                "observedGeneration": 0,
-                "replicas": 0,
-                "updatedReplicas": 0,
-                "availableReplicas": 0,
-                "unavailableReplicas": 0
             }
         },
         {
             "kind": "Service",
             "apiVersion": "v1",
             "metadata": {
-                "name": "${SERVICE_NAME}_influxdb",
+                "name": "${SERVICE_NAME}-influxdb",
                 "creationTimestamp": null,
                 "labels": {
-                    "app": "${SERVICE_NAME}_influxdb"
+                    "app": "${SERVICE_NAME}-influxdb"
                 },
                 "annotations": {
                     "openshift.io/generated-by": "OpenShiftWebConsole"
@@ -177,20 +169,17 @@
                     }
                 ],
                 "selector": {
-                    "deploymentconfig": "${SERVICE_NAME}_influxdb"
+                    "deploymentconfig": "${SERVICE_NAME}-influxdb"
                 },
                 "type": "ClusterIP",
                 "sessionAffinity": "None"
-            },
-            "status": {
-                "loadBalancer": {}
             }
         },
         {
             "kind": "Route",
             "apiVersion": "v1",
             "metadata": {
-                "name": "${SERVICE_NAME}_influxdb-admin",
+                "name": "${SERVICE_NAME}-influxdb-admin",
                 "creationTimestamp": null,
                 "annotations": {
                     "openshift.io/host.generated": "true"
@@ -200,36 +189,20 @@
                 "host": "",
                 "to": {
                     "kind": "Service",
-                    "name": "${SERVICE_NAME}_influxdb",
+                    "name": "${SERVICE_NAME}-influxdb",
                     "weight": 100
                 },
                 "port": {
                     "targetPort": "8083-tcp"
                 },
                 "wildcardPolicy": "None"
-            },
-            "status": {
-                "ingress": [
-                    {
-                        "host": "",
-                        "routerName": "router",
-                        "conditions": [
-                            {
-                                "type": "Admitted",
-                                "status": "True",
-                                "lastTransitionTime": "2017-06-05T00:18:58Z"
-                            }
-                        ],
-                        "wildcardPolicy": "None"
-                    }
-                ]
             }
         },
         {
             "kind": "Route",
             "apiVersion": "v1",
             "metadata": {
-                "name": "${SERVICE_NAME}_influxdb-api",
+                "name": "${SERVICE_NAME}-influxdb-api",
                 "creationTimestamp": null,
                 "annotations": {
                     "openshift.io/host.generated": "true"
@@ -239,40 +212,24 @@
                 "host": "",
                 "to": {
                     "kind": "Service",
-                    "name": "${SERVICE_NAME}_influxdb",
+                    "name": "${SERVICE_NAME}-influxdb",
                     "weight": 100
                 },
                 "port": {
                     "targetPort": "8086-tcp"
                 },
                 "wildcardPolicy": "None"
-            },
-            "status": {
-                "ingress": [
-                    {
-                        "host": "",
-                        "routerName": "router",
-                        "conditions": [
-                            {
-                                "type": "Admitted",
-                                "status": "True",
-                                "lastTransitionTime": "2017-06-05T00:19:21Z"
-                            }
-                        ],
-                        "wildcardPolicy": "None"
-                    }
-                ]
             }
         },
         {
             "kind": "ImageStream",
             "apiVersion": "v1",
             "metadata": {
-                "name": "${SERVICE_NAME}_influxdb",
+                "name": "${SERVICE_NAME}-influxdb",
                 "generation": 2,
                 "creationTimestamp": null,
                 "labels": {
-                    "app": "${SERVICE_NAME}_influxdb"
+                    "app": "${SERVICE_NAME}-influxdb"
                 },
                 "annotations": {
                     "openshift.io/image.dockerRepositoryCheck": "2017-06-05T00:02:18Z"
@@ -297,16 +254,13 @@
                         }
                     }
                 ]
-            },
-            "status": {
-                "dockerImageRepository": ""
             }
         },
         {
             "kind": "PersistentVolumeClaim",
             "apiVersion": "v1",
             "metadata": {
-                "name": "${SERVICE_NAME}_influxdb-data"
+                "name": "${SERVICE_NAME}-influxdb-data"
             },
             "spec": {
                 "accessModes": [
@@ -317,8 +271,7 @@
                         "storage": "1G"
                     }
                 }
-            },
-            "status": {}
+            }
         }
     ],
     "parameters": [
