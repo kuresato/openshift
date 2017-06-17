@@ -2,8 +2,7 @@
     "kind": "Template",
     "apiVersion": "v1",
     "metadata": {
-        "name": "influxdb",
-        "creationTimestamp": null
+        "name": "influxdb"
     },
     "objects": [
         {
@@ -11,13 +10,8 @@
             "apiVersion": "v1",
             "metadata": {
                 "name": "${SERVICE_NAME}-influxdb",
-                "generation": 1,
-                "creationTimestamp": null,
                 "labels": {
                     "app": "${SERVICE_NAME}-influxdb"
-                },
-                "annotations": {
-                    "openshift.io/generated-by": "OpenShiftWebConsole"
                 }
             },
             "spec": {
@@ -59,13 +53,9 @@
                 },
                 "template": {
                     "metadata": {
-                        "creationTimestamp": null,
                         "labels": {
                             "app": "${SERVICE_NAME}-influxdb",
                             "deploymentconfig": "${SERVICE_NAME}-influxdb"
-                        },
-                        "annotations": {
-                            "openshift.io/generated-by": "OpenShiftWebConsole"
                         }
                     },
                     "spec": {
@@ -145,12 +135,8 @@
             "apiVersion": "v1",
             "metadata": {
                 "name": "${SERVICE_NAME}-influxdb",
-                "creationTimestamp": null,
                 "labels": {
                     "app": "${SERVICE_NAME}-influxdb"
-                },
-                "annotations": {
-                    "openshift.io/generated-by": "OpenShiftWebConsole"
                 }
             },
             "spec": {
@@ -179,11 +165,7 @@
             "kind": "Route",
             "apiVersion": "v1",
             "metadata": {
-                "name": "${SERVICE_NAME}-influxdb-admin",
-                "creationTimestamp": null,
-                "annotations": {
-                    "openshift.io/host.generated": "true"
-                }
+                "name": "${SERVICE_NAME}-influxdb-admin"
             },
             "spec": {
                 "host": "",
@@ -202,11 +184,7 @@
             "kind": "Route",
             "apiVersion": "v1",
             "metadata": {
-                "name": "${SERVICE_NAME}-influxdb-api",
-                "creationTimestamp": null,
-                "annotations": {
-                    "openshift.io/host.generated": "true"
-                }
+                "name": "${SERVICE_NAME}-influxdb-api"
             },
             "spec": {
                 "host": "",
@@ -226,28 +204,18 @@
             "apiVersion": "v1",
             "metadata": {
                 "name": "${SERVICE_NAME}-influxdb",
-                "generation": 2,
-                "creationTimestamp": null,
                 "labels": {
                     "app": "${SERVICE_NAME}-influxdb"
-                },
-                "annotations": {
-                    "openshift.io/image.dockerRepositoryCheck": "2017-06-05T00:02:18Z"
                 }
             },
             "spec": {
                 "tags": [
                     {
                         "name": "1.2-alpine",
-                        "annotations": {
-                            "openshift.io/generated-by": "OpenShiftWebConsole",
-                            "openshift.io/imported-from": "influxdb:1.2-alpine"
-                        },
                         "from": {
                             "kind": "DockerImage",
                             "name": "influxdb:1.2-alpine"
                         },
-                        "generation": 2,
                         "importPolicy": {},
                         "referencePolicy": {
                             "type": "Source"
