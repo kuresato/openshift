@@ -1,0 +1,336 @@
+{
+    "kind": "Template",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "influxdb",
+        "creationTimestamp": null
+    },
+    "objects": [
+        {
+            "kind": "DeploymentConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${SERVICE_NAME}_influxdb",
+                "generation": 1,
+                "creationTimestamp": null,
+                "labels": {
+                    "app": "${SERVICE_NAME}_influxdb"
+                },
+                "annotations": {
+                    "openshift.io/generated-by": "OpenShiftWebConsole"
+                }
+            },
+            "spec": {
+                "strategy": {
+                    "type": "Rolling",
+                    "rollingParams": {
+                        "updatePeriodSeconds": 1,
+                        "intervalSeconds": 1,
+                        "timeoutSeconds": 600,
+                        "maxUnavailable": "25%",
+                        "maxSurge": "25%"
+                    },
+                    "resources": {},
+                    "activeDeadlineSeconds": 21600
+                },
+                "triggers": [
+                    {
+                        "type": "ConfigChange"
+                    },
+                    {
+                        "type": "ImageChange",
+                        "imageChangeParams": {
+                            "automatic": true,
+                            "containerNames": [
+                                "influxdb"
+                            ],
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "name": "influxdb:1.2-alpine"
+                            }
+                        }
+                    }
+                ],
+                "replicas": 1,
+                "test": false,
+                "selector": {
+                    "app": "${SERVICE_NAME}_influxdb",
+                    "deploymentconfig": "${SERVICE_NAME}_influxdb"
+                },
+                "template": {
+                    "metadata": {
+                        "creationTimestamp": null,
+                        "labels": {
+                            "app": "${SERVICE_NAME}_influxdb",
+                            "deploymentconfig": "${SERVICE_NAME}_influxdb"
+                        },
+                        "annotations": {
+                            "openshift.io/generated-by": "OpenShiftWebConsole"
+                        }
+                    },
+                    "spec": {
+                        "volumes": [
+                            {
+                                "name": "${SERVICE_NAME}_influxdb-data",
+                                "persistentVolumeClaim": {
+                                    "claimName": "${SERVICE_NAME}_influxdb-data"
+                                }
+                            }
+                        ],
+                        "containers": [
+                            {
+                                "name": "influxdb",
+                                "image": "influxdb:1.2-alpine",
+                                "ports": [
+                                    {
+                                        "containerPort": 8086,
+                                        "protocol": "TCP"
+                                    },
+                                    {
+                                        "containerPort": 8083,
+                                        "protocol": "TCP"
+                                    }
+                                ],
+                                "env": [
+                                    {
+                                        "name": "INFLUXDB_ADMIN_ENABLED",
+                                        "value": "true"
+                                    }
+                                ],
+                                "resources": {},
+                                "volumeMounts": [
+                                    {
+                                        "name": "${SERVICE_NAME}_influxdb-data",
+                                        "mountPath": "/var/lib/influxdb"
+                                    }
+                                ],
+                                "livenessProbe": {
+                                    "httpGet": {
+                                        "path": "/query?q=show+stats",
+                                        "port": 8086,
+                                        "scheme": "HTTP"
+                                    },
+                                    "initialDelaySeconds": 300,
+                                    "timeoutSeconds": 5,
+                                    "periodSeconds": 60,
+                                    "successThreshold": 1,
+                                    "failureThreshold": 3
+                                },
+                                "readinessProbe": {
+                                    "httpGet": {
+                                        "path": "/query?q=show+stats",
+                                        "port": 8086,
+                                        "scheme": "HTTP"
+                                    },
+                                    "initialDelaySeconds": 10,
+                                    "timeoutSeconds": 3,
+                                    "periodSeconds": 10,
+                                    "successThreshold": 1,
+                                    "failureThreshold": 3
+                                },
+                                "terminationMessagePath": "/dev/termination-log",
+                                "imagePullPolicy": "IfNotPresent"
+                            }
+                        ],
+                        "restartPolicy": "Always",
+                        "terminationGracePeriodSeconds": 30,
+                        "dnsPolicy": "ClusterFirst",
+                        "securityContext": {}
+                    }
+                }
+            },
+            "status": {
+                "latestVersion": 0,
+                "observedGeneration": 0,
+                "replicas": 0,
+                "updatedReplicas": 0,
+                "availableReplicas": 0,
+                "unavailableReplicas": 0
+            }
+        },
+        {
+            "kind": "Service",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${SERVICE_NAME}_influxdb",
+                "creationTimestamp": null,
+                "labels": {
+                    "app": "${SERVICE_NAME}_influxdb"
+                },
+                "annotations": {
+                    "openshift.io/generated-by": "OpenShiftWebConsole"
+                }
+            },
+            "spec": {
+                "ports": [
+                    {
+                        "name": "8083-tcp",
+                        "protocol": "TCP",
+                        "port": 8083,
+                        "targetPort": 8083
+                    },
+                    {
+                        "name": "8086-tcp",
+                        "protocol": "TCP",
+                        "port": 8086,
+                        "targetPort": 8086
+                    }
+                ],
+                "selector": {
+                    "deploymentconfig": "${SERVICE_NAME}_influxdb"
+                },
+                "type": "ClusterIP",
+                "sessionAffinity": "None"
+            },
+            "status": {
+                "loadBalancer": {}
+            }
+        },
+        {
+            "kind": "Route",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${SERVICE_NAME}_influxdb-admin",
+                "creationTimestamp": null,
+                "annotations": {
+                    "openshift.io/host.generated": "true"
+                }
+            },
+            "spec": {
+                "host": "",
+                "to": {
+                    "kind": "Service",
+                    "name": "${SERVICE_NAME}_influxdb",
+                    "weight": 100
+                },
+                "port": {
+                    "targetPort": "8083-tcp"
+                },
+                "wildcardPolicy": "None"
+            },
+            "status": {
+                "ingress": [
+                    {
+                        "host": "",
+                        "routerName": "router",
+                        "conditions": [
+                            {
+                                "type": "Admitted",
+                                "status": "True",
+                                "lastTransitionTime": "2017-06-05T00:18:58Z"
+                            }
+                        ],
+                        "wildcardPolicy": "None"
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "Route",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${SERVICE_NAME}_influxdb-api",
+                "creationTimestamp": null,
+                "annotations": {
+                    "openshift.io/host.generated": "true"
+                }
+            },
+            "spec": {
+                "host": "",
+                "to": {
+                    "kind": "Service",
+                    "name": "${SERVICE_NAME}_influxdb",
+                    "weight": 100
+                },
+                "port": {
+                    "targetPort": "8086-tcp"
+                },
+                "wildcardPolicy": "None"
+            },
+            "status": {
+                "ingress": [
+                    {
+                        "host": "",
+                        "routerName": "router",
+                        "conditions": [
+                            {
+                                "type": "Admitted",
+                                "status": "True",
+                                "lastTransitionTime": "2017-06-05T00:19:21Z"
+                            }
+                        ],
+                        "wildcardPolicy": "None"
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${SERVICE_NAME}_influxdb",
+                "generation": 2,
+                "creationTimestamp": null,
+                "labels": {
+                    "app": "${SERVICE_NAME}_influxdb"
+                },
+                "annotations": {
+                    "openshift.io/image.dockerRepositoryCheck": "2017-06-05T00:02:18Z"
+                }
+            },
+            "spec": {
+                "tags": [
+                    {
+                        "name": "1.2-alpine",
+                        "annotations": {
+                            "openshift.io/generated-by": "OpenShiftWebConsole",
+                            "openshift.io/imported-from": "influxdb:1.2-alpine"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "influxdb:1.2-alpine"
+                        },
+                        "generation": 2,
+                        "importPolicy": {},
+                        "referencePolicy": {
+                            "type": "Source"
+                        }
+                    }
+                ]
+            },
+            "status": {
+                "dockerImageRepository": ""
+            }
+        },
+        {
+            "kind": "PersistentVolumeClaim",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${SERVICE_NAME}_influxdb-data"
+            },
+            "spec": {
+                "accessModes": [
+                    "ReadWriteOnce"
+                ],
+                "resources": {
+                    "requests": {
+                        "storage": "1G"
+                    }
+                }
+            },
+            "status": {}
+        }
+    ],
+    "parameters": [
+        {
+            "name": "SERVICE_NAME",
+            "displayName": "Grafana Service Name",
+            "description": "The name of the OpenShift Service exposed for the Grafana container.",
+            "value": "grafana"
+        }
+    ],
+    "labels": {
+        "template": "grafana-template"
+    }
+
+}
