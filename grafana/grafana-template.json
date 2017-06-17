@@ -113,6 +113,9 @@
                 "name": "${SERVICE_NAME}",
                 "labels": {
                     "app": "${SERVICE_NAME}"
+                },
+                "annotations": {
+                    "service.alpha.openshift.io/dependencies": "[{\"name\":\"${SERVICE_NAME}-influxdb\",\"namespace\":\"\",\"kind\":\"Service\"}]"
                 }
             },
             "spec": {
