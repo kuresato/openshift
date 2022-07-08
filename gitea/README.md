@@ -1,5 +1,9 @@
 # Gitea
 
+## Gitea用のOperatorがあった 2022/0708
+
+* https://github.com/redhat-gpte-devopsautomation/gitea-operator
+
 ## ここのが使えそう 2018/7/10
 
 * https://github.com/wkulhanek/docker-openshift-gitea/tree/master/openshift
